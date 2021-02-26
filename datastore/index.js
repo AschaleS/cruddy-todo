@@ -39,9 +39,7 @@ exports.readAll = (callback) => {
 
 exports.readOne = (id, callback) => {
   var filePath = './test/testData/' + id.toString() + '.txt';
-  console.log(filePath);
   fs.readFile(filePath, 'utf8', (err, text) => {
-    console.log(text);
     if (err) {
       callback(new Error(`No item with id: ${id}`));
     } else {
@@ -51,12 +49,17 @@ exports.readOne = (id, callback) => {
 };
 
 exports.update = (id, text, callback) => {
-  var item = items[id];
-  if (!item) {
-    callback(new Error(`No item with id: ${id}`));
+  var filePath = './test/testData/' + id.toString() + '.txt';
+  if (fs.existsSync(filePath)) {
+    fs.writeFile(filePath, text, (err) => {
+      if (err) {
+        console.log('Cannot update file');
+      } else {
+        callback(null, { id, text });
+      }
+    });
   } else {
-    items[id] = text;
-    callback(null, { id, text });
+    callback(new Error(`No item with id: ${id}`));
   }
 };
 
