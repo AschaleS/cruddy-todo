@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
+var Promise = require('bluebird');
+const fsAsync = Promise.promisifyAll(fs);
 
 var items = {};
 
@@ -24,18 +26,61 @@ exports.create = (text, callback) => {
   });
 };
 
-exports.readAll = (callback) => {
-  var todos = [];
-  fs.readdir('./test/testData', (err, files) => {
-    _.each(files, file => {
-      var id = file.split('.')[0];
-      var text = id;
-      todos.push({id, text});
-    });
-    callback(null, todos);
-  });
 
+exports.readAll = function(callback) {
+  return fsAsync.readdirAsync('./test/testData')
+    .then((files) => {
+      let todos = files.map((file) => {
+        var id = file.split('.')[0];
+        var filePath = './test/testData/' + id.toString() + '.txt';
+        return fsAsync.readFileAsync(path.join('./test/testData', file), 'utf-8')
+          .then((text) => {
+            return {id, text};
+          });
+      });
+      // let todos = _.each(files, file => {
+      //   var id = file.split('.')[0];
+      //   var filePath = './test/testData/' + id.toString() + '.txt';
+      //   return fsAsync.readFileAsync(path.join('./test/testData', file), 'utf-8')
+      //     .then((text) => {
+      //       return {id, text};
+      //     });
+      // });
+      Promise.all(todos).then((todos) => {
+        callback(null, todos);
+      });
+    })
+    .catch((err) => {
+      callback(err);
+    });
+
+  // return new Promise(function(resolve, reject) {
+  //   fs.readdir('./test/testData', (err, files) => {
+  //     if (err) {
+  //       reject(err);
+  //     } else {
+  //       _.each(files, file => {
+  //         var id = file.split('.')[0];
+  //         resolve(id);
+  //       });
+  //     }
+  //   });
+  // });
 };
+
+
+// exports.readAll = (callback) => {
+//   var todos = [];
+//   fs.readdir('./test/testData', (err, files) => {
+//     _.each(files, file => {
+//       var id = file.split('.')[0];
+//       var text = id;
+//       todos.push({id, text});
+//     });
+//     callback(null, todos);
+//   });
+
+// };
 
 exports.readOne = (id, callback) => {
   var filePath = './test/testData/' + id.toString() + '.txt';
