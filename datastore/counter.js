@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const sprintf = require('sprintf-js').sprintf;
+const Promise = require('bluebird');
+const fsAsync = Promise.promisifyAll(fs);
 
 var counter = 0;
 
@@ -16,35 +18,36 @@ const zeroPaddedNumber = (num) => {
 };
 
 const readCounter = (callback) => {
-  fs.readFile(exports.counterFile, (err, fileData) => {
-    if (err) {
-      callback(null, 0);
-    } else {
+  return fsAsync.readFileAsync(exports.counterFile)
+    .then((fileData) => {
       callback(null, Number(fileData));
-    }
-  });
+    })
+    .catch((err) => {
+      callback(null, 0);
+    });
 };
 
 const writeCounter = (count, callback) => {
   var counterString = zeroPaddedNumber(count);
-  fs.writeFile(exports.counterFile, counterString, (err) => {
-    if (err) {
-      throw ('error writing counter');
-    } else {
+  return fsAsync.writeFileAsync(exports.counterFile, counterString)
+    .then(() => {
       callback(null, counterString);
-    }
-  });
+    })
+    .catch((err) => {
+      throw ('error writing counter');
+    });
+
 };
 
 // Public API - Fix this function //////////////////////////////////////////////
 
 exports.getNextUniqueId = (callback) => {
-  readCounter((err, counter) => {
+  return readCounter((err, counter) => {
     if (err) {
       console.log('error', err);
       callback(null, 0);
     } else {
-      writeCounter(counter + 1, (err) => {
+      return writeCounter(counter + 1, (err) => {
         if (err) {
           console.log('error', err);
         } else {
@@ -53,6 +56,7 @@ exports.getNextUniqueId = (callback) => {
       });
     }
   });
+
 };
 
 

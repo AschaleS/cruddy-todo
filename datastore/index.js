@@ -45,34 +45,8 @@ exports.readAll = function(callback) {
     .catch((err) => {
       callback(err);
     });
-
-  // return new Promise(function(resolve, reject) {
-  //   fs.readdir('./test/testData', (err, files) => {
-  //     if (err) {
-  //       reject(err);
-  //     } else {
-  //       _.each(files, file => {
-  //         var id = file.split('.')[0];
-  //         resolve(id);
-  //       });
-  //     }
-  //   });
-  // });
 };
 
-
-// exports.readAll = (callback) => {
-//   var todos = [];
-//   fs.readdir('./test/testData', (err, files) => {
-//     _.each(files, file => {
-//       var id = file.split('.')[0];
-//       var text = id;
-//       todos.push({id, text});
-//     });
-//     callback(null, todos);
-//   });
-
-// };
 
 exports.readOne = (id, callback) => {
   var filePath = exports.dataDir + '/' + id.toString() + '.txt';
