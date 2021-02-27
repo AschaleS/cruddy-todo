@@ -14,8 +14,8 @@ exports.create = (text, callback) => {
     if (err) {
       console.log('unique ID cannot be found');
     } else {
-      var uniqueFile = './test/testData/' + id.toString() + '.txt';
-      fs.writeFile(uniqueFile, text, (err) => {
+      var file = exports.dataDir + '/' + id.toString() + '.txt';
+      fs.writeFile(file, text, (err) => {
         if (err) {
           console.log('Cannot write file');
         } else {
@@ -28,24 +28,16 @@ exports.create = (text, callback) => {
 
 
 exports.readAll = function(callback) {
-  return fsAsync.readdirAsync('./test/testData')
+  return fsAsync.readdirAsync(exports.dataDir)
     .then((files) => {
       let todos = files.map((file) => {
         var id = file.split('.')[0];
-        var filePath = './test/testData/' + id.toString() + '.txt';
-        return fsAsync.readFileAsync(path.join('./test/testData', file), 'utf-8')
+        var filePath = exports.dataDir + '/' + id.toString() + '.txt';
+        return fsAsync.readFileAsync(path.join(exports.dataDir, file), 'utf-8')
           .then((text) => {
             return {id, text};
           });
       });
-      // let todos = _.each(files, file => {
-      //   var id = file.split('.')[0];
-      //   var filePath = './test/testData/' + id.toString() + '.txt';
-      //   return fsAsync.readFileAsync(path.join('./test/testData', file), 'utf-8')
-      //     .then((text) => {
-      //       return {id, text};
-      //     });
-      // });
       Promise.all(todos).then((todos) => {
         callback(null, todos);
       });
@@ -83,7 +75,7 @@ exports.readAll = function(callback) {
 // };
 
 exports.readOne = (id, callback) => {
-  var filePath = './test/testData/' + id.toString() + '.txt';
+  var filePath = exports.dataDir + '/' + id.toString() + '.txt';
   fs.readFile(filePath, 'utf8', (err, text) => {
     if (err) {
       callback(new Error(`No item with id: ${id}`));
@@ -94,7 +86,7 @@ exports.readOne = (id, callback) => {
 };
 
 exports.update = (id, text, callback) => {
-  var filePath = './test/testData/' + id.toString() + '.txt';
+  var filePath = exports.dataDir + '/' + id.toString() + '.txt';
   if (fs.existsSync(filePath)) {
     fs.writeFile(filePath, text, (err) => {
       if (err) {
@@ -109,7 +101,7 @@ exports.update = (id, text, callback) => {
 };
 
 exports.delete = (id, callback) => {
-  var filePath = './test/testData/' + id.toString() + '.txt';
+  var filePath = exports.dataDir + '/' + id.toString() + '.txt';
   if (fs.existsSync(filePath)) {
     fs.unlink(filePath, (err) => {
       if (err) {
